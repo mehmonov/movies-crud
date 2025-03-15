@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/mehmonov/movies-crud/config"
+	"github.com/mehmonov/movies-crud/internal/api/controllers"
 	"github.com/mehmonov/movies-crud/internal/api/handlers"
 	"github.com/mehmonov/movies-crud/internal/api/middleware"
 	"github.com/mehmonov/movies-crud/internal/services"
@@ -19,9 +20,10 @@ func NewRouter(
 ) *gin.Engine {
 	router := gin.Default()
 
-	jwtService := auth.NewJWTService(cfg.JWTSecret)
+	jwtService := auth.NewJWTService(cfg.JWTSecret, cfg.JWTSecret)
 
-	movieHandler := handlers.NewMovieHandler(movieService)
+	movieController := controllers.NewMovieController(movieService)
+	movieHandler := handlers.NewMovieHandler(movieController)
 	userHandler := handlers.NewUserHandler(userService, jwtService)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -32,6 +34,7 @@ func NewRouter(
 		{
 			auth.POST("/register", userHandler.Register)
 			auth.POST("/login", userHandler.Login)
+			auth.POST("/refresh", userHandler.RefreshToken)
 		}
 
 		movies := api.Group("/movies")

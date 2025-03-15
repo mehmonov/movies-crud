@@ -75,14 +75,47 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.jwtService.GenerateToken(user.ID)
+	tokens, err := h.jwtService.GenerateTokenPair(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
 		return
 	}
 
 	c.JSON(http.StatusOK, models.LoginResponse{
-		Token: token,
-		User:  user,
+		User:      user,
+		TokenPair: *tokens,
 	})
+}
+
+// @Summary Refresh token
+// @Description Get new access token using refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param refresh_token body models.RefreshTokenRequest true "Refresh token"
+// @Success 200 {object} models.TokenPair
+// @Failure 401 {object} object
+// @Router /auth/refresh [post]
+func (h *UserHandler) RefreshToken(c *gin.Context) {
+	var req models.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Refresh tokenni tekshirish
+	userID, err := h.jwtService.ValidateRefreshToken(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+
+	// Yangi token pair yaratish
+	tokens, err := h.jwtService.GenerateTokenPair(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tokens)
 } 

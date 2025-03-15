@@ -12,6 +12,8 @@ type Config struct {
     DBName     string
     ServerPort string
     JWTSecret  string
+    AccessTokenSecret  string
+    RefreshTokenSecret string
 }
 
 func NewConfig() *Config {
@@ -23,6 +25,8 @@ func NewConfig() *Config {
         DBName:     getEnv("DB_NAME", "movies-crud"),
         ServerPort: getEnv("SERVER_PORT", "8080"),
         JWTSecret:  getEnv("JWT_SECRET", "your-secret-key"),
+        AccessTokenSecret:  getEnv("ACCESS_TOKEN_SECRET", "your-access-token-secret"),
+        RefreshTokenSecret: getEnv("REFRESH_TOKEN_SECRET", "your-refresh-token-secret"),
     }
 }
 
