@@ -11,6 +11,7 @@ import (
 	"github.com/mehmonov/movies-crud/internal/api/middleware"
 	"github.com/mehmonov/movies-crud/internal/services"
 	"github.com/mehmonov/movies-crud/pkg/auth"
+	"github.com/mehmonov/movies-crud/pkg/filestore"
 )
 
 func NewRouter(
@@ -21,8 +22,9 @@ func NewRouter(
 	router := gin.Default()
 
 	jwtService := auth.NewJWTService(cfg.JWTSecret, cfg.JWTSecret)
+	fileStore := filestore.NewFileStore("./uploads") // or cfg.UploadPath
 
-	movieController := controllers.NewMovieController(movieService)
+	movieController := controllers.NewMovieController(movieService, fileStore)
 	movieHandler := handlers.NewMovieHandler(movieController)
 	userHandler := handlers.NewUserHandler(userService, jwtService)
 
@@ -49,6 +51,8 @@ func NewRouter(
 				movies.POST("", movieHandler.CreateMovie)
 				movies.PUT("/:id", movieHandler.UpdateMovie)
 				movies.DELETE("/:id", movieHandler.DeleteMovie)
+				movies.POST("/:id/file", movieHandler.UploadMovieFile)
+				movies.GET("/:id/files/:fileId", movieHandler.GetMovieFile)
 			}
 		}
 	}

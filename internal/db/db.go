@@ -24,6 +24,7 @@ func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 		&models.Movie{},
 		&models.MovieMedia{},
 		&models.MovieMetadata{},
+		&models.MovieFile{},
 		&models.User{},
 	)
 	if err != nil {

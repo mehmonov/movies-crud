@@ -1,17 +1,22 @@
 package controllers
 
 import (
+	"mime/multipart"
+
 	"github.com/mehmonov/movies-crud/internal/models"
 	"github.com/mehmonov/movies-crud/internal/services"
+	"github.com/mehmonov/movies-crud/pkg/filestore"
 )
 
 type MovieController struct {
 	movieService *services.MovieService
+	fileStore    *filestore.FileStore
 }
 
-func NewMovieController(movieService *services.MovieService) *MovieController {
+func NewMovieController(movieService *services.MovieService, fileStore *filestore.FileStore) *MovieController {
 	return &MovieController{
 		movieService: movieService,
+		fileStore:    fileStore,
 	}
 }
 
@@ -41,4 +46,12 @@ func (c *MovieController) GetMovieMediaFiles(movieID uint) ([]models.MovieMedia,
 
 func (c *MovieController) GetMovieMediaFilesByType(movieID uint, mediaType string) ([]models.MovieMedia, error) {
 	return c.movieService.GetMovieMediaFilesByType(movieID, mediaType)
+}
+
+func (c *MovieController) UploadMovieFile(movieID uint, file *multipart.FileHeader) (*models.MovieFile, error) {
+	return c.movieService.UploadMovieFile(movieID, file, c.fileStore)
+}
+
+func (c *MovieController) GetMovieFileContent(movieID, fileID uint) (*models.MovieFile, error) {
+	return c.movieService.GetMovieFileContent(movieID, fileID)
 }

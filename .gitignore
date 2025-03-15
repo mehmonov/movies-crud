@@ -14,3 +14,6 @@ movies-crud
 
 # Docker volumes
 postgres_data/
+
+
+uploads/

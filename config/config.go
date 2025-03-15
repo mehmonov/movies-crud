@@ -14,6 +14,7 @@ type Config struct {
     JWTSecret  string
     AccessTokenSecret  string
     RefreshTokenSecret string
+    UploadPath string
 }
 
 func NewConfig() *Config {
@@ -27,6 +28,7 @@ func NewConfig() *Config {
         JWTSecret:  getEnv("JWT_SECRET", "your-secret-key"),
         AccessTokenSecret:  getEnv("ACCESS_TOKEN_SECRET", "your-access-token-secret"),
         RefreshTokenSecret: getEnv("REFRESH_TOKEN_SECRET", "your-refresh-token-secret"),
+        UploadPath: getEnv("UPLOAD_PATH", "./uploads"),
     }
 }
 

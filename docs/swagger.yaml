@@ -3,11 +3,15 @@ definitions:
   models.CreateMovieRequest:
     properties:
       director:
+        maxLength: 100
         type: string
       duration:
+        description: Maximum 1000 minutes (16.6 hours)
+        maximum: 1000
         minimum: 0
         type: integer
       genre:
+        maxLength: 50
         type: string
       media_files:
         items:
@@ -22,6 +26,7 @@ definitions:
         minimum: 0
         type: number
       title:
+        maxLength: 100
         type: string
       year:
         maximum: 2100
@@ -90,6 +95,21 @@ definitions:
       updated_at:
         type: string
       year:
+        type: integer
+    type: object
+  models.MovieFileResponse:
+    properties:
+      content_type:
+        type: string
+      created_at:
+        type: string
+      file_name:
+        type: string
+      file_size:
+        type: integer
+      id:
+        type: integer
+      movie_id:
         type: integer
     type: object
   models.MovieMedia:
@@ -173,11 +193,14 @@ definitions:
   models.UpdateMovieRequest:
     properties:
       director:
+        maxLength: 100
         type: string
       duration:
+        maximum: 1000
         minimum: 0
         type: integer
       genre:
+        maxLength: 50
         type: string
       media_files:
         items:
@@ -192,6 +215,7 @@ definitions:
         minimum: 0
         type: number
       title:
+        maxLength: 100
         type: string
       year:
         maximum: 2100
@@ -422,6 +446,84 @@ paths:
           schema:
             type: object
       summary: Update a movie
+      tags:
+      - movies
+  /movies/{id}/file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a video file for a movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Movie file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.MovieFileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload movie file
+      tags:
+      - movies
+  /movies/{id}/files/{fileId}:
+    get:
+      description: Download a movie file by ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: File ID
+        in: path
+        name: fileId
+        required: true
+        type: integer
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Download movie file
       tags:
       - movies
   /movies/{id}/media:

@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -205,4 +207,103 @@ func (h *MovieHandler) GetMovieMediaFiles(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, mediaFiles)
+}
+
+// @Summary Upload movie file
+// @Description Upload a video file for a movie
+// @Tags movies
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path int true "Movie ID"
+// @Param file formData file true "Movie file"
+// @Security BearerAuth
+// @Success 201 {object} models.MovieFileResponse
+// @Failure 400 {object} object
+// @Failure 401 {object} object
+// @Failure 404 {object} object
+// @Router /movies/{id}/file [post]
+func (h *MovieHandler) UploadMovieFile(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
+		return
+	}
+
+	movieFile, err := h.movieController.UploadMovieFile(uint(id), file)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := models.MovieFileResponse{
+		ID:          movieFile.ID,
+		MovieID:     movieFile.MovieID,
+		FileName:    movieFile.FileName,
+		FileSize:    movieFile.FileSize,
+		ContentType: movieFile.ContentType,
+		CreatedAt:   movieFile.CreatedAt,
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+// @Summary Download movie file
+// @Description Download a movie file by ID
+// @Tags movies
+// @Produce octet-stream
+// @Param id path int true "Movie ID"
+// @Param fileId path int true "File ID"
+// @Security BearerAuth
+// @Success 200 {file} binary
+// @Failure 400 {object} object
+// @Failure 401 {object} object
+// @Failure 404 {object} object
+// @Router /movies/{id}/files/{fileId} [get]
+func (h *MovieHandler) GetMovieFile(c *gin.Context) {
+	// Get movie ID
+	movieID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid movie ID format"})
+		return
+	}
+
+	// Get file ID
+	fileID, err := strconv.ParseUint(c.Param("fileId"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file ID format"})
+		return
+	}
+
+	// Get file info from database
+	movieFile, err := h.movieController.GetMovieFileContent(uint(movieID), uint(fileID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve file info"})
+		return
+	}
+	if movieFile == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+
+	// Check if file exists
+	if _, err := os.Stat(movieFile.FilePath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found on disk"})
+		return
+	}
+
+	// Set headers for file download
+	c.Header("Content-Description", "File Transfer")
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", movieFile.FileName))
+	c.Header("Content-Type", movieFile.ContentType)
+
+	// Serve the file
+	c.File(movieFile.FilePath)
 }

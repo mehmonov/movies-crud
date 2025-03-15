@@ -6,7 +6,10 @@ import (
 
 	"gorm.io/gorm"
 
+	"mime/multipart"
+
 	"github.com/mehmonov/movies-crud/internal/models"
+	"github.com/mehmonov/movies-crud/pkg/filestore"
 )
 
 type MovieService struct {
@@ -194,4 +197,72 @@ func (s *MovieService) GetMovieMediaFilesByType(movieID uint, mediaType string) 
 		return nil, result.Error
 	}
 	return mediaFiles, nil
+}
+
+func (s *MovieService) UploadMovieFile(movieID uint, fileHeader *multipart.FileHeader, fileStore *filestore.FileStore) (*models.MovieFile, error) {
+	// Check if movie exists
+	movie, err := s.GetMovieByID(movieID)
+	if err != nil || movie == nil {
+		return nil, errors.New("movie not found")
+	}
+
+	if fileHeader.Size > 2<<30 {
+		return nil, errors.New("file size exceeds maximum limit")
+	}
+
+	// Validate file type
+	contentType := fileHeader.Header.Get("Content-Type")
+	allowedTypes := map[string]bool{
+		"video/mp4":        true,
+		"video/x-matroska": true, // MKV
+		"video/quicktime":  true, // MOV
+	}
+	if !allowedTypes[contentType] {
+		return nil, errors.New("unsupported file type")
+	}
+
+	// Save file
+	filePath, fileHash, err := fileStore.SaveFile(fileHeader, movieID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create database record
+	movieFile := &models.MovieFile{
+		MovieID:     movieID,
+		FileName:    fileHeader.Filename,
+		FileSize:    fileHeader.Size,
+		ContentType: contentType,
+		FilePath:    filePath,
+		FileHash:    fileHash,
+	}
+
+	if err := s.db.Create(movieFile).Error; err != nil {
+		// Cleanup file if database insert fails
+		fileStore.DeleteFile(filePath)
+		return nil, err
+	}
+
+	return movieFile, nil
+}
+
+func (s *MovieService) GetMovieFile(movieID, fileID uint) (*models.MovieFile, error) {
+	var movieFile models.MovieFile
+	err := s.db.Where("movie_id = ? AND id = ?", movieID, fileID).First(&movieFile).Error
+	if err != nil {
+		return nil, err
+	}
+	return &movieFile, nil
+}
+
+func (s *MovieService) GetMovieFileContent(movieID, fileID uint) (*models.MovieFile, error) {
+	var movieFile models.MovieFile
+	err := s.db.Where("movie_id = ? AND id = ?", movieID, fileID).First(&movieFile).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &movieFile, nil
 }

@@ -330,6 +330,127 @@ const docTemplate = `{
                 }
             }
         },
+        "/movies/{id}/file": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload a video file for a movie",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Upload movie file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Movie file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.MovieFileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/{id}/files/{fileId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Download a movie file by ID",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Download movie file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "File ID",
+                        "name": "fileId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/movies/{id}/media": {
             "get": {
                 "description": "Get all media files for a specific movie",
@@ -394,14 +515,18 @@ const docTemplate = `{
             ],
             "properties": {
                 "director": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "duration": {
+                    "description": "Maximum 1000 minutes (16.6 hours)",
                     "type": "integer",
+                    "maximum": 1000,
                     "minimum": 0
                 },
                 "genre": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 50
                 },
                 "media_files": {
                     "type": "array",
@@ -421,7 +546,8 @@ const docTemplate = `{
                     "minimum": 0
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "year": {
                     "type": "integer",
@@ -515,6 +641,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.MovieFileResponse": {
+            "type": "object",
+            "properties": {
+                "content_type": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "file_size": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "movie_id": {
                     "type": "integer"
                 }
             }
@@ -641,14 +790,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "director": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "duration": {
                     "type": "integer",
+                    "maximum": 1000,
                     "minimum": 0
                 },
                 "genre": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 50
                 },
                 "media_files": {
                     "type": "array",
@@ -668,7 +820,8 @@ const docTemplate = `{
                     "minimum": 0
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "year": {
                     "type": "integer",
