@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  models.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
   models.CreateMovieRequest:
     properties:
       director:
@@ -39,13 +46,6 @@ definitions:
     required:
     - password
     - username
-    type: object
-  models.LoginResponse:
-    properties:
-      token:
-        type: string
-      user:
-        $ref: '#/definitions/models.User'
     type: object
   models.Movie:
     properties:
@@ -120,7 +120,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.LoginResponse'
+            $ref: '#/definitions/models.AuthResponse'
         "401":
           description: Unauthorized
           schema:

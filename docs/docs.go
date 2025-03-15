@@ -52,7 +52,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.LoginResponse"
+                            "$ref": "#/definitions/models.AuthResponse"
                         }
                     },
                     "401": {
@@ -292,6 +292,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                }
+            }
+        },
         "models.CreateMovieRequest": {
             "type": "object",
             "required": [
@@ -346,17 +357,6 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
-                }
-            }
-        },
-        "models.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/models.User"
                 }
             }
         },

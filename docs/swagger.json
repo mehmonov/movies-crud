@@ -46,7 +46,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.LoginResponse"
+                            "$ref": "#/definitions/models.AuthResponse"
                         }
                     },
                     "401": {
@@ -286,6 +286,17 @@
         }
     },
     "definitions": {
+        "models.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                }
+            }
+        },
         "models.CreateMovieRequest": {
             "type": "object",
             "required": [
@@ -340,17 +351,6 @@
                 },
                 "username": {
                     "type": "string"
-                }
-            }
-        },
-        "models.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/models.User"
                 }
             }
         },

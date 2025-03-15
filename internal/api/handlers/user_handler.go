@@ -54,7 +54,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param credentials body models.LoginRequest true "Login credentials"
-// @Success 200 {object} models.LoginResponse
+// @Success 200 {object} models.AuthResponse
 // @Failure 401 {object} object
 // @Router /auth/login [post]
 func (h *UserHandler) Login(c *gin.Context) {
@@ -81,8 +81,16 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, models.LoginResponse{
+	// Create a safe user response without password 
+	safeUser := &models.User{
+		ID:        user.ID,
+		Username:  user.Username,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	c.JSON(http.StatusOK, models.AuthResponse{
 		Token: token,
-		User:  user,
+		User:  safeUser,
 	})
-} 
+}
