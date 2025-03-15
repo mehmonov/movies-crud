@@ -85,7 +85,7 @@ docker-compose down
 
 
 
-!! Extendet version id here
+!! Extended version is here
 ```
 
 git checkout additional
