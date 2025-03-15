@@ -33,4 +33,12 @@ func (c *MovieController) UpdateMovie(id uint, req *models.UpdateMovieRequest) e
 
 func (c *MovieController) DeleteMovie(id uint) error {
 	return c.movieService.DeleteMovie(id)
-} 
+}
+
+func (c *MovieController) GetMovieMediaFiles(movieID uint) ([]models.MovieMedia, error) {
+	return c.movieService.GetMovieMediaFiles(movieID)
+}
+
+func (c *MovieController) GetMovieMediaFilesByType(movieID uint, mediaType string) ([]models.MovieMedia, error) {
+	return c.movieService.GetMovieMediaFilesByType(movieID, mediaType)
+}

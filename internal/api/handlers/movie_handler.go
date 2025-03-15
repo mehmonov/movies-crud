@@ -151,3 +151,58 @@ func (h *MovieHandler) DeleteMovie(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// @Summary Get movie media files
+// @Description Get all media files for a specific movie
+// @Tags movies
+// @Accept json
+// @Produce json
+// @Param id path int true "Movie ID"
+// @Param type query string false "Media type (poster, backdrop, trailer)"
+// @Success 200 {array} models.MovieMedia
+// @Failure 400 {object} object
+// @Failure 404 {object} object
+// @Router /movies/{id}/media [get]
+func (h *MovieHandler) GetMovieMediaFiles(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	// Check if movie exists
+	movie, err := h.movieController.GetMovieByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve movie"})
+		return
+	}
+	if movie == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Movie not found"})
+		return
+	}
+
+	// Check if type parameter is provided
+	mediaType := c.Query("type")
+	var mediaFiles []models.MovieMedia
+
+	if mediaType != "" {
+		// Validate media type
+		validTypes := map[string]bool{"poster": true, "backdrop": true, "trailer": true}
+		if !validTypes[mediaType] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid media type"})
+			return
+		}
+
+		mediaFiles, err = h.movieController.GetMovieMediaFilesByType(uint(id), mediaType)
+	} else {
+		mediaFiles, err = h.movieController.GetMovieMediaFiles(uint(id))
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve media files"})
+		return
+	}
+
+	c.JSON(http.StatusOK, mediaFiles)
+}

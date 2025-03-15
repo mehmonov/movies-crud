@@ -20,7 +20,12 @@ func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 	}
 
 	// Auto-migrate the schema
-	err = db.AutoMigrate(&models.Movie{}, &models.User{})
+	err = db.AutoMigrate(
+		&models.Movie{},
+		&models.MovieMedia{},
+		&models.MovieMetadata{},
+		&models.User{},
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -4,8 +4,23 @@ definitions:
     properties:
       director:
         type: string
+      duration:
+        minimum: 0
+        type: integer
+      genre:
+        type: string
+      media_files:
+        items:
+          $ref: '#/definitions/models.MovieMediaRequest'
+        type: array
+      metadata:
+        $ref: '#/definitions/models.MovieMetadataRequest'
       plot:
         type: string
+      rating:
+        maximum: 10
+        minimum: 0
+        type: number
       title:
         type: string
       year:
@@ -53,16 +68,93 @@ definitions:
         type: string
       director:
         type: string
+      duration:
+        description: Minutes
+        type: integer
+      genre:
+        type: string
       id:
         type: integer
+      media_files:
+        items:
+          $ref: '#/definitions/models.MovieMedia'
+        type: array
+      metadata:
+        $ref: '#/definitions/models.MovieMetadata'
       plot:
         type: string
+      rating:
+        type: number
       title:
         type: string
       updated_at:
         type: string
       year:
         type: integer
+    type: object
+  models.MovieMedia:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_main:
+        type: boolean
+      movie_id:
+        type: integer
+      type:
+        description: poster, backdrop, trailer
+        type: string
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
+  models.MovieMediaRequest:
+    properties:
+      is_main:
+        type: boolean
+      type:
+        enum:
+        - poster
+        - backdrop
+        - trailer
+        type: string
+      url:
+        type: string
+    required:
+    - type
+    - url
+    type: object
+  models.MovieMetadata:
+    properties:
+      awards:
+        type: string
+      cast:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      language:
+        type: string
+      movie_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.MovieMetadataRequest:
+    properties:
+      awards:
+        type: string
+      cast:
+        type: string
+      country:
+        type: string
+      language:
+        type: string
     type: object
   models.RefreshTokenRequest:
     properties:
@@ -82,8 +174,23 @@ definitions:
     properties:
       director:
         type: string
+      duration:
+        minimum: 0
+        type: integer
+      genre:
+        type: string
+      media_files:
+        items:
+          $ref: '#/definitions/models.MovieMediaRequest'
+        type: array
+      metadata:
+        $ref: '#/definitions/models.MovieMetadataRequest'
       plot:
         type: string
+      rating:
+        maximum: 10
+        minimum: 0
+        type: number
       title:
         type: string
       year:
@@ -315,6 +422,41 @@ paths:
           schema:
             type: object
       summary: Update a movie
+      tags:
+      - movies
+  /movies/{id}/media:
+    get:
+      consumes:
+      - application/json
+      description: Get all media files for a specific movie
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Media type (poster, backdrop, trailer)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MovieMedia'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            type: object
+      summary: Get movie media files
       tags:
       - movies
 securityDefinitions:

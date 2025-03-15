@@ -329,6 +329,59 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/movies/{id}/media": {
+            "get": {
+                "description": "Get all media files for a specific movie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movie media files",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Movie ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Media type (poster, backdrop, trailer)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.MovieMedia"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -343,8 +396,29 @@ const docTemplate = `{
                 "director": {
                     "type": "string"
                 },
+                "duration": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "media_files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MovieMediaRequest"
+                    }
+                },
+                "metadata": {
+                    "$ref": "#/definitions/models.MovieMetadataRequest"
+                },
                 "plot": {
                     "type": "string"
+                },
+                "rating": {
+                    "type": "number",
+                    "maximum": 10,
+                    "minimum": 0
                 },
                 "title": {
                     "type": "string"
@@ -409,11 +483,30 @@ const docTemplate = `{
                 "director": {
                     "type": "string"
                 },
+                "duration": {
+                    "description": "Minutes",
+                    "type": "integer"
+                },
+                "genre": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
+                "media_files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MovieMedia"
+                    }
+                },
+                "metadata": {
+                    "$ref": "#/definitions/models.MovieMetadata"
+                },
                 "plot": {
                     "type": "string"
+                },
+                "rating": {
+                    "type": "number"
                 },
                 "title": {
                     "type": "string"
@@ -423,6 +516,102 @@ const docTemplate = `{
                 },
                 "year": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.MovieMedia": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_main": {
+                    "type": "boolean"
+                },
+                "movie_id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "poster, backdrop, trailer",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MovieMediaRequest": {
+            "type": "object",
+            "required": [
+                "type",
+                "url"
+            ],
+            "properties": {
+                "is_main": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "poster",
+                        "backdrop",
+                        "trailer"
+                    ]
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MovieMetadata": {
+            "type": "object",
+            "properties": {
+                "awards": {
+                    "type": "string"
+                },
+                "cast": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "movie_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MovieMetadataRequest": {
+            "type": "object",
+            "properties": {
+                "awards": {
+                    "type": "string"
+                },
+                "cast": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "language": {
+                    "type": "string"
                 }
             }
         },
@@ -454,8 +643,29 @@ const docTemplate = `{
                 "director": {
                     "type": "string"
                 },
+                "duration": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "media_files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MovieMediaRequest"
+                    }
+                },
+                "metadata": {
+                    "$ref": "#/definitions/models.MovieMetadataRequest"
+                },
                 "plot": {
                     "type": "string"
+                },
+                "rating": {
+                    "type": "number",
+                    "maximum": 10,
+                    "minimum": 0
                 },
                 "title": {
                     "type": "string"

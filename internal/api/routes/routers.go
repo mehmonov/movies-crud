@@ -39,8 +39,9 @@ func NewRouter(
 
 		movies := api.Group("/movies")
 		{
-			movies.GET("", movieHandler.GetAllMovies)     // Public endpoint
-			movies.GET("/:id", movieHandler.GetMovieByID) // Public endpoint
+			movies.GET("", movieHandler.GetAllMovies)                 // Public endpoint
+			movies.GET("/:id", movieHandler.GetMovieByID)             // Public endpoint
+			movies.GET("/:id/media", movieHandler.GetMovieMediaFiles) // Yangi endpoint
 
 			// Protected movie routes (with auth middleware)
 			movies.Use(middleware.AuthMiddleware(jwtService))
