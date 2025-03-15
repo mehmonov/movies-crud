@@ -2,30 +2,49 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
+    container_name: movies_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: movies_db
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
+      POSTGRES_DB: ${DB_NAME:-movies_crud}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
 
   app:
-    build: .
-    ports:
-      - "8080:8080"
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: movies_app
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=movies_db
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_NAME=${DB_NAME:-movies_crud}
       - SERVER_PORT=8080
-      - JWT_SECRET=your-secret-key
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key}
+    ports:
+      - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -1,1 +1,16 @@
+# Environment variables
 .env
+
+# Binary files
+main
+movies-crud
+
+# IDE files
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Docker volumes
+postgres_data/
