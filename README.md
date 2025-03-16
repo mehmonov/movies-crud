@@ -105,7 +105,7 @@ UPLOAD_PATH=./uploads
 ```bash
 git clone https://github.com/mehmonov/movies-crud.git
 cd movies-crud
-git checkout extended
+git checkout additional
 ```
 
 2. Set up environment:
@@ -125,7 +125,7 @@ chmod 755 uploads
 docker-compose up --build
 ```
 
-## References
+## References(Links i read about file upload)
 
 - [OWASP File Upload Security](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
 - [Content-Type Headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type)
